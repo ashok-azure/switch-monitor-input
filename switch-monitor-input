@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+
+use v5.10;
+use strict;
+use warnings;
+use autodie;
+use File::Basename;
+use IO::Handle;
+
+use Data::Dumper;
+
+my $version = "1.0.0";
+my $scriptname = basename($0, ".pl");
+
+# autoflush stdout and stderr
+STDOUT->autoflush(1);
+STDERR->autoflush(1);
+
+# For Dell U2720Q
+# 15: DisplayPort
+# 17: HDMI
+# 27: USB-C
+
+# Switch between DisplayPort and HDMI
+my @default_inputs = qw{ 15 17 };
+
+# read config file if available
+my $config = qx{ cat ~/.$scriptname };
+chomp $config;
+my @inputs = m{\d}xms =~ $config;
+say Dumper \@inputs;
+
+# read current input
+
+# set monitor input
+
