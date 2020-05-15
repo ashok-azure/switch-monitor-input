@@ -9,8 +9,11 @@ use IO::Handle;
 
 use Data::Dumper;
 
-my $version = "1.0.0";
+my $version    = "1.0.0";
 my $scriptname = basename($0, ".pl");
+
+my $ddcctl     = "~/bin/ddcctl";
+my $configfile = "$ENV{HOME}/.$scriptname";
 
 # autoflush stdout and stderr
 STDOUT->autoflush(1);
@@ -25,12 +28,65 @@ STDERR->autoflush(1);
 my @default_inputs = qw{ 15 17 };
 
 # read config file if available
-my $config = qx{ cat ~/.$scriptname };
-chomp $config;
-my @inputs = m{\d}xms =~ $config;
-say Dumper \@inputs;
+my @inputs = @default_inputs;
+if ( -f $configfile ) {
+   my $config = slurp( $configfile );
+   chomp $config;
+   #say Dumper \$config;
+   @inputs = $config =~ m{(\d+)}g;
+   #say Dumper \@inputs;
+} else {
+   # create a default config
+   writefile( $configfile, join( ' ', @inputs ) );
+}
 
 # read current input
+my $cmd = "$ddcctl -d 1 -i \? |";
+my $current_input;
+open my $cmdfh, $cmd or die;
+while ( <$cmdfh> ) {
+   if ( m{^I: \s+ VCP \s+ control \s+ \#96 \s+ \(0x60\) \s+ = \s+ current: \s+ (\d+),}xms ) {
+      #say;
+      $current_input = $1;
+   }
+}
+close $cmdfh;
+die "unable to read current input: $!" unless $current_input;
+
+say "current input: $current_input";
+
+# search next input in list
+my $next_input;
+my $found = 0;
+foreach my $i ( @inputs ) {
+   if ( $i == $current_input ) {
+      $found = 1;
+      next;
+   } else {
+      $next_input = $i if $found;
+   }
+   last if $found;
+}
+$next_input = (@inputs)[0] if ( $found and ! $next_input ); # the last element in the list was the current one, so get the first as the next
+say "next input: $next_input";
 
 # set monitor input
+
+qx{ $ddcctl -d 1 -i $next_input};
+
+sub slurp {
+   my $file = shift;
+   open my $fh, '<', $file or die;
+   local $/ = undef;
+   my $cont = <$fh>;
+   close $fh;
+   return $cont;
+}
+
+sub writefile {
+   my ( $file, $line ) = @_;
+   open my $fh, '>', $file or die;
+   say $fh $line;
+   close $fh;
+}
 
