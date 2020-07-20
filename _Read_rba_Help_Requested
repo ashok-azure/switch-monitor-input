@@ -1,0 +1,21 @@
+Hello Rba,
+
+NOTE: I'm not able to find your email address to contact you. So, I am adding text file.
+EMAIL: ASHOK.AZUREDEVOPS@GMAIL.COM
+Monitor:name: DELL U2720Q
+INPUT1:MAC-HDMI
+INPUT2:WINDOWS-USB-C
+
+
+Firstly, I want to thank  you for the wrapper to ddcctl.
+I have a few blockers while exec file- I have update
+my @default_inputs = qw{ 27 17 }; to switch b/w USB-C and HDMI.
+But, for some reason when i execute file sys giving following values on
+current input: 15
+next input: 17 and i debugged code
+line#38 (i.e @inputs = $config =~ m{(\d+)}g;) config
+returning values as 15 and 17 - why still config is returning 15 and 17 - what suggestions you will give to make it work b/w HDMI and USB-C
+. Help or directions greatly appreciated.
+
+Thanks,
+-Ashok
